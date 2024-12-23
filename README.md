@@ -1,50 +1,27 @@
-# React + TypeScript + Vite
+# Meus primeiros projetos em react
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Apresentação
 
-Currently, two official plugins are available:
+&emsp;&emsp;A fim de me preparar para trabalhar como bolsista em desenvolvimeto front-end com react, me foi preparado uma série de projetos para me ambientar com a biblioteca em questão e ganhar experiência com a ferramenta, utilizando padrões de design decididos previamente, padrões esses que são utilizados nas aplicações da bolsa de estudos.
+<hr>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Incrementador e decrementador
 
-## Expanding the ESLint configuration
+&emsp;&emsp;Primeiramente, entendendo como funcionavam os hooks de estado com ```useState```, desenvolvi um incrementador e decrementador de um valor numérico inicializado em 0, onde se o número for negativo, o número fica na cor vermelha, caso contrário o número ficará na cor verde.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Formulário com validações
 
-- Configure the top-level `parserOptions` property like this:
+&emsp;&emsp;Após o primeiro projeto, construi um formulário de submissão utilizando validação através da biblioteca ```yup```, para validar os requisitos do formulário, e impedir que chegue algum dado mal formatado na requisição para o servidor.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Requisições para APIs externas
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+&emsp;&emsp;Em seguida, construi uma tela, onde seu conteúdo é uma lista de dados de uma API externa que foi requisitada através da biblioteca ```axios```, e assim então, formatando sua estrutura e design e entendendo como funciona as requisições de APIs com react.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+## Projeto final - Microblog
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+&emsp;&emsp;Após todos esses projetos e ensinamentos, construi minha primeira aplicação com react, um microblog onde há autenticação, e postagem de publicações e comentários, utilizando todos os aprendizados de projetos anteriores e das aulas que tive sobre as ferramentas utilizadas
+
+### Outras bibliotecas e ferramentas utilizadas
+
+- ```figma``` - Usado para prototipação e componentização de telas
+- ```zustand``` - Usada para gerenciamento global de estados
