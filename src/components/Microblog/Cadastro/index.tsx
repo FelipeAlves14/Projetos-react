@@ -4,9 +4,9 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import axiosRequestor from "../axiosRequestor";
+import useUsersStore, { setToken } from "../usersStore";
 
-export interface UserProps {
-  [key: string]: string;
+export interface CadastroProps {
   username: string;
   nome: string;
   senha: string;
@@ -29,12 +29,13 @@ export default function Cadastro() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const { setUser } = useUsersStore();
   const navigate = useNavigate();
   const [errorSenha, setErrorSenha] = useState<string>("");
   const [errorUser, setErrorUser] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
-  async function submitForm(data: UserProps): Promise<void> {
+  async function submitForm(data: CadastroProps): Promise<void> {
     setErrorSenha("");
     setErrorUser("");
     if (data["senha"] !== data["confirmSenha"]) {
@@ -46,12 +47,15 @@ export default function Cadastro() {
       const signUp = { username: username, nome: nome, senha: senha };
       await axiosRequestor.post("cadastrar/", signUp);
       const signIn = { username: username, password: senha };
-      await axiosRequestor.post("login/", signIn, {
+      const response = await axiosRequestor.post("login/", signIn, {
         headers: {
           "Content-Type": "application/json",
         },
       });
+      const { access } = response.data;
+      setToken(access);
       setSuccess(`Conta cadastrada com sucesso, olá ${data["username"]}`);
+      setUser({ username: username, nome: nome });
       setTimeout(() => {
         navigate("/Microblog/inicio");
       }, 2000);

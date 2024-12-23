@@ -1,8 +1,14 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { PublicacaoProps } from "../Publicacao";
 import axiosRequestor from "../axiosRequestor";
+import { useNavigate } from "react-router-dom";
+
+export interface PublicacaoFormProps {
+  titulo: string;
+  descricao: string;
+  imagem?: string;
+}
 
 export default function FormularioPublicacao() {
   const schema = yup.object().shape({
@@ -24,7 +30,8 @@ export default function FormularioPublicacao() {
   } = useForm({
     resolver: yupResolver(schema),
   });
-  async function submitPub(pub: PublicacaoProps): Promise<void> {
+  const navigate = useNavigate();
+  async function submitPub(pub: PublicacaoFormProps): Promise<void> {
     try {
       await axiosRequestor.post("publicacao/", pub, {
         headers: {
@@ -34,6 +41,7 @@ export default function FormularioPublicacao() {
       reset();
     } catch (err) {
       console.error(err);
+      navigate("/Microblog/login");
     }
   }
 

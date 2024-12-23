@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./usersStore";
 
 const axiosRequestor = axios.create({
-  baseURL: "http://localhost:8000/"
+  baseURL: "http://localhost:8000/",
 });
 
 axiosRequestor.interceptors.request.use(
@@ -10,7 +10,7 @@ axiosRequestor.interceptors.request.use(
     const token = getToken();
 
     if (token) config.headers["Authorization"] = `Bearer ${token}`;
-
+    
     return config;
   },
   (error) => {

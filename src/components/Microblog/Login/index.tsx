@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Header from "../Header";
 import axiosRequestor from "../axiosRequestor";
-import { setToken } from "../usersStore";
+import useUsersStore, { setToken } from "../usersStore";
 
 export default function Login() {
-  interface signInProps {
+  interface LoginProps {
     username: string;
     senha: string;
   }
@@ -27,8 +27,9 @@ export default function Login() {
   const navigate = useNavigate();
   const [errorCredentials, setErrorCredentials] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const { setUser } = useUsersStore();
 
-  async function submitForm(data: signInProps): Promise<void> {
+  async function submitForm(data: LoginProps): Promise<void> {
     setErrorCredentials("");
     try {
       const { username, senha } = data;
@@ -44,6 +45,7 @@ export default function Login() {
       setToken(access);
 
       setSuccess(`Conta autenticada com sucesso, olá ${data["username"]}`);
+      setUser({ username: username });
       setTimeout(() => {
         navigate("/Microblog/inicio");
       }, 2000);

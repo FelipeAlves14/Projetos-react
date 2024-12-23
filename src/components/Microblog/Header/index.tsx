@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import useUsersStore from "../usersStore";
 
 export default function Header() {
+  const { user } = useUsersStore();
   return (
     <header className="br-header container-fluid compact mb-3">
       <div className="container-fluid">
@@ -98,7 +100,9 @@ export default function Header() {
               <div className="header-sign-in">
                 <Link className="br-sign-in small" to={"/Microblog/login"}>
                   <i className="fas fa-user" aria-hidden="true"></i>
-                  <span className="d-sm-inline">Entrar</span>
+                  <span className="d-sm-inline">
+                    {user ? user.username : "Entrar"}
+                  </span>
                 </Link>
               </div>
               <div className="header-avatar"></div>
