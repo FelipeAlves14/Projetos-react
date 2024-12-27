@@ -34,46 +34,65 @@ export default function Cadastro(): JSX.Element {
   const navigate: NavigateFunction = useNavigate();
   const [errorSenha, setErrorSenha] = useState<string>("");
   const [errorUser, setErrorUser] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
   async function submitForm(data: CadastroProps): Promise<void> {
     setErrorSenha("");
     setErrorUser("");
+    setError("");
     if (data["senha"] !== data["confirmSenha"]) {
       setErrorSenha("As senhas não conferem");
       return;
     }
-    try {
-      const { username, nome, senha } = data;
-      const signUp: CadastroProps = {
-        username: username,
-        nome: nome,
-        senha: senha,
-      };
-      await axiosRequestor.post("cadastrar/", signUp, {
+    const { username, nome, senha } = data;
+    const signUp: CadastroProps = {
+      username: username,
+      nome: nome,
+      senha: senha,
+    };
+    await axiosRequestor
+      .post("cadastrar/", signUp, {
         headers: {
           "Content-Type": "application/json",
         },
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.response)
+          switch (err.response.status) {
+            case 400:
+              setErrorUser("Este nome de usuário já está sendo utilizado");
+              break;
+            case 500:
+              setError(
+                "Ocorreu um erro no servidor, por favor tente novamente mais tarde."
+              );
+          }
       });
-      const signIn: LoginProps = { username: username, password: senha };
-      const response = await axiosRequestor.post("login/", signIn, {
+    const signIn: LoginProps = { username: username, password: senha };
+    const response = await axiosRequestor
+      .post("login/", signIn, {
         headers: {
           "Content-Type": "application/json",
         },
+      })
+      .then((response) => response.data)
+      .catch((err) => {
+        console.error(err);
+        if (err.response)
+          setError(
+            "Ocorreu um erro no servidor, por favor tente novamente mais tarde."
+          );
       });
-      const { access } = response.data;
-      setToken(access);
-      setSuccess(`Conta cadastrada com sucesso, olá ${data["username"]}`);
-      setUser({ username: username, nome: nome });
-      setTimeout(() => {
-        navigate("/Microblog/inicio");
-      }, 2000);
-    } catch (err) {
-      console.error(err);
-      setErrorUser("Este nome de usuário já está sendo utilizado");
-    }
+    const { access } = response;
+    setToken(access);
+    setSuccess(`Conta cadastrada com sucesso, olá ${data["username"]}`);
+    setUser({ username: username, ultimo_login: new Date() });
+    setTimeout(() => {
+      navigate("/Microblog/inicio");
+    }, 2000);
   }
-
   return (
     <form
       className="container d-flex flex-column align-items-center p-3"
@@ -199,6 +218,12 @@ export default function Cadastro(): JSX.Element {
         <span className="feedback success" role="alert" id="success">
           <i className="fas fa-check-circle" aria-hidden="true"></i>
           {success}
+        </span>
+      )}
+      {error && (
+        <span className="feedback danger" role="alert" id="danger">
+          <i className="fas fa-times-circle" aria-hidden="true"></i>
+          {error}
         </span>
       )}
     </form>

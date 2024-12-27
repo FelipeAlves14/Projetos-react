@@ -26,33 +26,48 @@ export default function Login(): JSX.Element {
   });
   const navigate: NavigateFunction = useNavigate();
   const [errorCredentials, setErrorCredentials] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const { setUser } = useUsersStore();
 
   async function submitForm(data: LoginProps): Promise<void> {
     setErrorCredentials("");
-    try {
-      const { username, password } = data;
-      const signIn: LoginProps = { username: username, password: password };
-      const response = await axiosRequestor.post("login/", signIn, {
+    setError("");
+    const { username, password } = data;
+    const signIn: LoginProps = { username: username, password: password };
+    const response = await axiosRequestor
+      .post("login/", signIn, {
         headers: {
           "Content-Type": "application/json",
         },
+      })
+      .then((response) => response.data)
+      .catch((err) => {
+        console.error(err);
+        if (err.response)
+          switch (err.response.status) {
+            case 401:
+              setErrorCredentials(
+                "Credenciais inválidas, por favor tente novamente."
+              );
+              break;
+            case 500:
+              setError(
+                "Ocorreu um erro no servidor, por favor tente novamente mais tarde."
+              );
+              break;
+          }
       });
 
-      const { access } = response.data;
+    const { access } = response;
 
-      setToken(access);
+    setToken(access);
 
-      setSuccess(`Conta autenticada com sucesso, olá ${data["username"]}`);
-      setUser({ username: username });
-      setTimeout(() => {
-        navigate("/Microblog/inicio");
-      }, 2000);
-    } catch (err) {
-      console.error(err);
-      setErrorCredentials("Credenciais inválidas, por favor tente novamente.");
-    }
+    setSuccess(`Conta autenticada com sucesso, olá ${data["username"]}`);
+    setUser({ username: username, ultimo_login: new Date() });
+    setTimeout(() => {
+      navigate("/Microblog/inicio");
+    }, 2000);
   }
 
   return (
@@ -125,6 +140,12 @@ export default function Login(): JSX.Element {
           <span className="feedback success" role="alert" id="success">
             <i className="fas fa-check-circle" aria-hidden="true"></i>
             {success}
+          </span>
+        )}
+        {error && (
+          <span className="feedback danger" role="alert" id="danger">
+            <i className="fas fa-times-circle" aria-hidden="true"></i>
+            {error}
           </span>
         )}
       </form>
