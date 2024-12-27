@@ -13,7 +13,7 @@ const useUsersStore = create(
     (set) => ({
       user: {
         username: "",
-        nome: "",
+        ultimo_login: new Date(),
       },
 
       setUser: (userData: UserProps) => {
