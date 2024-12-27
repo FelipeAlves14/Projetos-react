@@ -1,21 +1,21 @@
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Header from "../Header";
 import axiosRequestor from "../axiosRequestor";
 import useUsersStore, { setToken } from "../usersStore";
 
-export default function Login() {
-  interface LoginProps {
-    username: string;
-    senha: string;
-  }
+export interface LoginProps {
+  username: string;
+  password: string;
+}
 
+export default function Login(): JSX.Element {
   const schema = yup.object().shape({
     username: yup.string().required("Todos os campos devem estar preenchidos"),
-    senha: yup.string().required("Todos os campos devem estar preenchidos"),
+    password: yup.string().required("Todos os campos devem estar preenchidos"),
   });
   const {
     handleSubmit,
@@ -24,7 +24,7 @@ export default function Login() {
   } = useForm({
     resolver: yupResolver(schema),
   });
-  const navigate = useNavigate();
+  const navigate: NavigateFunction = useNavigate();
   const [errorCredentials, setErrorCredentials] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const { setUser } = useUsersStore();
@@ -32,8 +32,8 @@ export default function Login() {
   async function submitForm(data: LoginProps): Promise<void> {
     setErrorCredentials("");
     try {
-      const { username, senha } = data;
-      const signIn = { username: username, password: senha };
+      const { username, password } = data;
+      const signIn: LoginProps = { username: username, password: password };
       const response = await axiosRequestor.post("login/", signIn, {
         headers: {
           "Content-Type": "application/json",
@@ -100,12 +100,12 @@ export default function Login() {
                 id="input-icon"
                 type="password"
                 placeholder="Digite sua senha..."
-                {...register("senha")}
+                {...register("password")}
               />
-              {errors.senha?.message && (
+              {errors.password?.message && (
                 <span className="feedback danger" role="alert" id="danger">
                   <i className="fas fa-times-circle" aria-hidden="true"></i>
-                  {errors.senha.message}
+                  {errors.password.message}
                 </span>
               )}
             </div>

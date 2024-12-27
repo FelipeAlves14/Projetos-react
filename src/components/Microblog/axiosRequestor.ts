@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getToken } from "./usersStore";
 
-const axiosRequestor = axios.create({
+const axiosRequestor: axios.AxiosInstance = axios.create({
   baseURL: "http://localhost:8000/",
 });
 

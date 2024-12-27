@@ -1,19 +1,20 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import axiosRequestor from "../axiosRequestor";
 import useUsersStore, { setToken } from "../usersStore";
+import { LoginProps } from "../Login";
 
 export interface CadastroProps {
   username: string;
   nome: string;
   senha: string;
-  confirmSenha: string;
+  confirmSenha?: string;
 }
 
-export default function Cadastro() {
+export default function Cadastro(): JSX.Element {
   const schema = yup.object().shape({
     username: yup.string().required("Todos os campos devem estar preenchidos"),
     nome: yup.string().required("Todos os campos devem estar preenchidos"),
@@ -30,7 +31,7 @@ export default function Cadastro() {
     resolver: yupResolver(schema),
   });
   const { setUser } = useUsersStore();
-  const navigate = useNavigate();
+  const navigate: NavigateFunction = useNavigate();
   const [errorSenha, setErrorSenha] = useState<string>("");
   const [errorUser, setErrorUser] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
@@ -44,9 +45,17 @@ export default function Cadastro() {
     }
     try {
       const { username, nome, senha } = data;
-      const signUp = { username: username, nome: nome, senha: senha };
-      await axiosRequestor.post("cadastrar/", signUp);
-      const signIn = { username: username, password: senha };
+      const signUp: CadastroProps = {
+        username: username,
+        nome: nome,
+        senha: senha,
+      };
+      await axiosRequestor.post("cadastrar/", signUp, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const signIn: LoginProps = { username: username, password: senha };
       const response = await axiosRequestor.post("login/", signIn, {
         headers: {
           "Content-Type": "application/json",
