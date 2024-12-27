@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axiosRequestor from "../axiosRequestor";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 export interface PublicacaoProps {
   id: number;
@@ -33,7 +33,7 @@ export interface ComentarioProps {
   publicado_em: string;
 }
 
-export default function Publicacao(props: PublicacaoProps) {
+export default function Publicacao(props: PublicacaoProps): JSX.Element {
   const schema = yup.object().shape({
     mensagem: yup
       .string()
@@ -53,7 +53,7 @@ export default function Publicacao(props: PublicacaoProps) {
   const [listaComentarios, setListaComentarios] = useState<ComentarioProps[]>(
     []
   );
-  const navigate = useNavigate();
+  const navigate: NavigateFunction = useNavigate();
 
   async function submitComment(data: ComentarioFormProps) {
     try {
@@ -66,6 +66,7 @@ export default function Publicacao(props: PublicacaoProps) {
           "Content-Type": "application/json",
         },
       });
+      window.location.reload();
     } catch (err) {
       console.error(err);
       navigate("/Microblog/login");
@@ -73,20 +74,19 @@ export default function Publicacao(props: PublicacaoProps) {
     reset();
   }
 
-  const fetchComentarios = async () => {
-    const comentarios = await axiosRequestor
-      .get(`publicacao/${id}/comentarios/`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then((response) => response.data.results);
-    setListaComentarios(comentarios);
-  };
-
   useEffect(() => {
+    const fetchComentarios = async (): Promise<void> => {
+      const comentarios = await axiosRequestor
+        .get(`publicacao/${id}/comentarios/`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => response.data.results);
+      setListaComentarios(comentarios);
+    };
     fetchComentarios();
-  }, [setListaComentarios]);
+  }, []);
 
   return (
     <div className="col-10 p-0">
@@ -124,11 +124,11 @@ export default function Publicacao(props: PublicacaoProps) {
         </div>
         {comentarios && (
           <>
-            <span className="br-divider light-mode mx-3"></span>
+            <span className="br-divider light-mode mb-3 mx-3"></span>
             <div className="card-footer d-flex flex-column">
               <form onSubmit={handleSubmit(submitComment)}>
                 <div className="flex-column text-left">
-                  <button className="br-button secondary m-1" type="submit">
+                  <button className="br-button secondary mb-2" type="submit">
                     Comentar
                   </button>
                   <div className="col-12">
@@ -157,25 +157,19 @@ export default function Publicacao(props: PublicacaoProps) {
                 </div>
               </form>
               <div className="d-flex overflow-auto flex-column">
-                {listaComentarios.map((comentario: ComentarioProps) => (
-                  <div className="text-left w-fixed">
-                    <div className="d-flex justify-content-between">
-                      {comentario.autor ? (
-                        <legend className="text-up-02">
-                          {autor?.username}
+                {listaComentarios.map(
+                  (comentario: ComentarioProps, index: number) => (
+                    <div key={index} className="text-left w-fixed">
+                      <div className="d-flex justify-content-between">
+                        <legend className="text-up-02">{comentario.autor.username}</legend>
+                        <legend className="text-weight-light">
+                          {comentario.publicado_em.substring(0, 10)}
                         </legend>
-                      ) : (
-                        <legend className="text-up-02">
-                          Autor desconhecido
-                        </legend>
-                      )}
-                      <legend className="text-weight-light">
-                        {comentario.publicado_em.substring(0, 10)}
-                      </legend>
+                      </div>
+                      <p>{comentario.mensagem}</p>
                     </div>
-                    <p>{comentario.mensagem}</p>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           </>
