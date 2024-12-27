@@ -13,9 +13,6 @@ export default function Header(): JSX.Element {
                 <Link className="br-item" target="blank" to="https://sproutsocial.com/pt/glossary/microblog/">
                   O que é um Microblog?
                 </Link>
-                <a className="br-item" href="javascript:void(0)">
-                  Sobre nós
-                </a>
               </div>
             </div>
             <span className="br-divider vertical mx-half mx-sm-1"></span>
@@ -35,27 +32,17 @@ export default function Header(): JSX.Element {
         <div className="header-bottom">
           <div className="header-menu">
             <div className="header-menu-trigger">
-              <button
-                className="br-button small circle"
-                type="button"
-                aria-label="Menu"
-                data-toggle="menu"
-                data-target="#main-navigation"
-                id="menu-compact"
-              >
-                <i className="fas fa-bars" aria-hidden="true"></i>
-              </button>
+              <img
+                src="../images/Microblog.png"
+                style={{ width: 50, height: 50 }}
+                alt="logo"
+              />
             </div>
             <div className="header-info">
               <div className="header-title">Microblog da PNP</div>
               <div className="header-subtitle">Seu microblog preferido</div>
             </div>
             <div className="header-logo">
-              <img
-                src="../images/Microblog.png"
-                style={{ width: 20, height: 20 }}
-                alt="logo"
-              />
               <span className="br-divider vertical"></span>
             </div>
           </div>
