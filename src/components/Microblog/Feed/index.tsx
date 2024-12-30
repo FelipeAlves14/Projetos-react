@@ -10,7 +10,7 @@ import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 export interface PublicacaoFormProps {
   titulo: string;
   descricao: string;
-  imagem?: File | string;
+  imagem?: File;
 }
 
 export default function Feed(): JSX.Element {
@@ -155,6 +155,7 @@ export default function Feed(): JSX.Element {
                   className="br-button"
                   type="button"
                 >
+                  <i className="fas fa-search" aria-hidden="true"></i>
                   Descubra aqui
                 </Link>
               </div>
