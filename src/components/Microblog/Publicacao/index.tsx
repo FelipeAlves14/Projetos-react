@@ -44,9 +44,10 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
   });
   const { id, autor, publicado_em, descricao, imagem, titulo } = props;
   const data_publicacao = new Date(publicado_em);
-  const dia = (data_publicacao.getDate()).toString().padStart(2, "0");
+  const dia = data_publicacao.getDate().toString().padStart(2, "0");
   const mes = (data_publicacao.getMonth() + 1).toString().padStart(2, "0");
   const ano = data_publicacao.getFullYear().toString();
+  const [error, setError] = useState<string>("");
   const [comentarios, setComentarios] = useState<boolean>(false);
   const [novoComentario, setNovoComentario] = useState<boolean>(false);
   const [listaComentarios, setListaComentarios] = useState<ComentarioProps[]>(
@@ -55,21 +56,32 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
   const navigate: NavigateFunction = useNavigate();
 
   async function submitComment(data: ComentarioFormProps) {
-    try {
-      const comentario: ComentarioFormProps = {
-        publicacao: id,
-        mensagem: data.mensagem,
-      };
-      await axiosRequestor.post("comentario/", comentario, {
+    const comentario: ComentarioFormProps = {
+      publicacao: id,
+      mensagem: data.mensagem,
+    };
+    await axiosRequestor
+      .post("comentario/", comentario, {
         headers: {
           "Content-Type": "application/json",
         },
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              navigate("/Microblog/login");
+              break;
+            case 500:
+              setError(
+                "Ocorreu um erro no servidor, por favor tente novamente mais tarde."
+              );
+              break;
+          }
+        }
       });
-      setNovoComentario(!novoComentario);
-    } catch (err) {
-      console.error(err);
-      navigate("/Microblog/login");
-    }
+    setNovoComentario(!novoComentario);
     reset();
   }
   const fetchComentarios = async (): Promise<void> => {
@@ -160,6 +172,12 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
               <i className="fas fa-share" aria-hidden="true"></i>
               Comentar
             </button>
+            {error && (
+              <span className="feedback danger mx-3" role="alert" id="danger">
+                <i className="fas fa-times-circle" aria-hidden="true"></i>
+                {error}
+              </span>
+            )}
           </div>
         </form>
         {comentarios && (

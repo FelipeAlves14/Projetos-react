@@ -16,6 +16,7 @@ export interface PublicacaoFormProps {
 export default function Feed(): JSX.Element {
   const [pubs, setPubs] = useState<PublicacaoProps[]>([]);
   const [novaPub, setNovaPub] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const schema = yup.object().shape({
     titulo: yup
       .string()
@@ -37,23 +38,37 @@ export default function Feed(): JSX.Element {
   });
   const navigate: NavigateFunction = useNavigate();
   async function submitPub(pub: PublicacaoFormProps): Promise<void> {
-    try {
-      const data: PublicacaoFormProps = {
-        titulo: pub.titulo,
-        descricao: pub.descricao,
-        imagem: pub.imagem[0] ?? "",
-      };
-      await axiosRequestor.post("publicacao/", data, {
+    const data: PublicacaoFormProps = {
+      titulo: pub.titulo,
+      descricao: pub.descricao,
+      imagem: pub.imagem[0] ?? "",
+    };
+    await axiosRequestor
+      .post("publicacao/", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              navigate("/Microblog/login");
+              break;
+            case 500:
+              setError(
+                "Ocorreu um erro no servidor, por favor tente novamente mais tarde."
+              );
+              setTimeout(() => {
+                navigate("/Microblog/cadastro");
+              }, 2000);
+              break;
+          }
+        }
       });
-      reset();
-      setNovaPub(!novaPub);
-    } catch (err) {
-      console.error(err);
-      navigate("/Microblog/login");
-    }
+    reset();
+    setNovaPub(!novaPub);
   }
   const fetchPublicacoes = async (): Promise<void> => {
     const publicacoes = await axiosRequestor
@@ -137,6 +152,12 @@ export default function Feed(): JSX.Element {
                 <i className="fas fa-share" aria-hidden="true"></i>
                 Publicar
               </button>
+              {error && (
+                <span className="feedback danger mr-6" role="alert" id="danger">
+                  <i className="fas fa-times-circle" aria-hidden="true"></i>
+                  {error}
+                </span>
+              )}
             </div>
             <div
               className="col-4 shadow-sm text-right p-3 mt-3"
@@ -148,7 +169,7 @@ export default function Feed(): JSX.Element {
                   E nossos padrões de design, tem curiosidade?
                 </h3>
               </div>
-              <div className="br-magic-button">
+              <div className="br-magic-button mr-6">
                 <Link
                   to="https://www.gov.br/ds/home"
                   target="blank"
