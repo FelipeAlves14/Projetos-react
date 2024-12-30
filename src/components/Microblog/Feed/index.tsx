@@ -17,6 +17,8 @@ export default function Feed(): JSX.Element {
   const [pubs, setPubs] = useState<PublicacaoProps[]>([]);
   const [novaPub, setNovaPub] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const navigate: NavigateFunction = useNavigate();
+
   const schema = yup.object().shape({
     titulo: yup
       .string()
@@ -28,6 +30,7 @@ export default function Feed(): JSX.Element {
       .max(1200, "Este campo excedeu o limite de caracteres"),
     imagem: yup.mixed<File>(),
   });
+
   const {
     handleSubmit,
     reset,
@@ -36,13 +39,14 @@ export default function Feed(): JSX.Element {
   } = useForm({
     resolver: yupResolver(schema),
   });
-  const navigate: NavigateFunction = useNavigate();
+  
   async function submitPub(pub: PublicacaoFormProps): Promise<void> {
     const data: PublicacaoFormProps = {
       titulo: pub.titulo,
       descricao: pub.descricao,
       imagem: pub.imagem[0] ?? "",
     };
+
     await axiosRequestor
       .post("publicacao/", data, {
         headers: {
@@ -67,9 +71,11 @@ export default function Feed(): JSX.Element {
           }
         }
       });
+
     reset();
     setNovaPub(!novaPub);
   }
+
   const fetchPublicacoes = async (): Promise<void> => {
     const publicacoes = await axiosRequestor
       .get("publicacao/", {
@@ -87,6 +93,7 @@ export default function Feed(): JSX.Element {
   useEffect(() => {
     fetchPublicacoes();
   }, [novaPub]);
+  
   return (
     <>
       <Header />

@@ -23,6 +23,7 @@ export default function Cadastro(): JSX.Element {
       .string()
       .required("Todos os campos devem estar preenchidos"),
   });
+
   const {
     handleSubmit,
     register,
@@ -30,6 +31,7 @@ export default function Cadastro(): JSX.Element {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
   const { setUser } = useUsersStore();
   const navigate: NavigateFunction = useNavigate();
   const [errorSenha, setErrorSenha] = useState<string>("");
@@ -41,16 +43,19 @@ export default function Cadastro(): JSX.Element {
     setErrorSenha("");
     setErrorUser("");
     setError("");
+
     if (data["senha"] !== data["confirmSenha"]) {
       setErrorSenha("As senhas não conferem");
       return;
     }
+
     const { username, nome, senha } = data;
     const signUp: CadastroProps = {
       username: username,
       nome: nome,
       senha: senha,
     };
+
     await axiosRequestor
       .post("cadastrar/", signUp, {
         headers: {
@@ -70,6 +75,7 @@ export default function Cadastro(): JSX.Element {
               );
           }
       });
+
     const signIn: LoginProps = { username: username, password: senha };
     const response = await axiosRequestor
       .post("login/", signIn, {
@@ -85,14 +91,17 @@ export default function Cadastro(): JSX.Element {
             "Ocorreu um erro no servidor, por favor tente novamente mais tarde."
           );
       });
+
     const { access } = response;
     setToken(access);
+
     setSuccess(`Conta cadastrada com sucesso, olá ${data["username"]}`);
     setUser({ username: username, ultimo_login: new Date() });
     setTimeout(() => {
       navigate("/Microblog/inicio");
     }, 2000);
   }
+  
   return (
     <form
       className="container d-flex flex-column align-items-center p-3"

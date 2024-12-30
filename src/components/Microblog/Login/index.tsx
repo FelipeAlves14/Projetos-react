@@ -17,6 +17,7 @@ export default function Login(): JSX.Element {
     username: yup.string().required("Todos os campos devem estar preenchidos"),
     password: yup.string().required("Todos os campos devem estar preenchidos"),
   });
+
   const {
     handleSubmit,
     register,
@@ -24,6 +25,7 @@ export default function Login(): JSX.Element {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
   const navigate: NavigateFunction = useNavigate();
   const [errorCredentials, setErrorCredentials] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -33,8 +35,10 @@ export default function Login(): JSX.Element {
   async function submitForm(data: LoginProps): Promise<void> {
     setErrorCredentials("");
     setError("");
+
     const { username, password } = data;
     const signIn: LoginProps = { username: username, password: password };
+
     const response = await axiosRequestor
       .post("login/", signIn, {
         headers: {
@@ -60,7 +64,6 @@ export default function Login(): JSX.Element {
       });
 
     const { access } = response;
-
     setToken(access);
 
     setSuccess(`Conta autenticada com sucesso, olá ${data["username"]}`);

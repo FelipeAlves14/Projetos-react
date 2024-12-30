@@ -3,6 +3,7 @@ import useUsersStore from "../usersStore";
 
 export default function Header(): JSX.Element {
   const { user } = useUsersStore();
+  
   return (
     <header className="br-header container-fluid compact mb-3">
       <div className="container-fluid">

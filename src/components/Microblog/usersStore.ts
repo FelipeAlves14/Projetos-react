@@ -1,11 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { UserProps } from "./Publicacao";
 
 interface UsersStore {
   user: UserProps;
   setUser: (user: UserProps) => void;
   token?: string;
+}
+
+export interface UserProps {
+  id?: number;
+  username: string;
+  nome?: string;
+  ultimo_login: Date;
 }
 
 const useUsersStore = create(

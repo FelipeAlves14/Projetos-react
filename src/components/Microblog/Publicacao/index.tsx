@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import axiosRequestor from "../axiosRequestor";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import Comentario, { ComentarioProps } from "../Comentario";
+import { UserProps } from "../usersStore";
 
 export interface PublicacaoProps {
   id: number;
@@ -13,13 +14,6 @@ export interface PublicacaoProps {
   titulo: string;
   descricao: string;
   imagem?: string;
-}
-
-export interface UserProps {
-  id?: number;
-  username: string;
-  nome?: string;
-  ultimo_login: Date;
 }
 
 export interface ComentarioFormProps {
@@ -34,6 +28,7 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
       .required("Escreva seu comentário para podermos enviá-lo")
       .max(400, "Este campo excedeu o limite de caracteres"),
   });
+
   const {
     handleSubmit,
     register,
@@ -42,6 +37,7 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
   const { id, autor, publicado_em, descricao, imagem, titulo } = props;
   const data_publicacao = new Date(publicado_em);
   const dia = data_publicacao.getDate().toString().padStart(2, "0");
@@ -84,6 +80,7 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
     setNovoComentario(!novoComentario);
     reset();
   }
+
   const fetchComentarios = async (): Promise<void> => {
     const comentarios = await axiosRequestor
       .get(`publicacao/${id}/comentarios/`, {
