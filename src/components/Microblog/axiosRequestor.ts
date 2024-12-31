@@ -21,9 +21,10 @@ axiosRequestor.interceptors.request.use(
     if (data_agora.getTime() - data_login.getTime() > 18000000) {
       // equivalente a 5 horas
       setToken("");
+      useUsersStore.setState({ user: { ...user, username: "" } });
       config.headers["Authorization"] = "";
     } else if (token) config.headers["Authorization"] = `Bearer ${token}`;
-    
+
     return config;
   },
   (error) => {

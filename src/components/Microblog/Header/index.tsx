@@ -26,7 +26,7 @@ export default function Header(): JSX.Element {
                 <Link className="br-sign-in small" to="/Microblog/login">
                   <i className="fas fa-user" aria-hidden="true"></i>
                   <span className="d-sm-inline">
-                    {user ? user.username : "Entrar"}
+                    {user.username ? user.username : "Entrar"}
                   </span>
                 </Link>
               </div>
