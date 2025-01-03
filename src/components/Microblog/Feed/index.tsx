@@ -17,6 +17,8 @@ export default function Feed(): JSX.Element {
   const [pubs, setPubs] = useState<PublicacaoProps[]>([]);
   const [novaPub, setNovaPub] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [errorPagination, setErrorPagination] = useState<string>("");
   const navigate: NavigateFunction = useNavigate();
 
   const schema = yup.object().shape({
@@ -39,7 +41,7 @@ export default function Feed(): JSX.Element {
   } = useForm({
     resolver: yupResolver(schema),
   });
-  
+
   async function submitPub(pub: PublicacaoFormProps): Promise<void> {
     const data: PublicacaoFormProps = {
       titulo: pub.titulo,
@@ -77,14 +79,21 @@ export default function Feed(): JSX.Element {
   }
 
   const fetchPublicacoes = async (): Promise<void> => {
-    const publicacoes = await axiosRequestor
-      .get("publicacao/", {
+    await axiosRequestor
+      .get(`publicacao/?page=${page}`, {
         headers: {
           "Content-Type": "application/json",
         },
       })
-      .then((response) => response.data.results);
-    setPubs(publicacoes);
+      .then((response) => setPubs(response.data.results))
+      .catch((err) => {
+        console.error(err);
+        if (err.response.status === 404) {
+          setErrorPagination("Não há mais publicações para serem exibidas.");
+          setPage(page - 1);
+          return;
+        }
+      });
   };
 
   useEffect(() => {
@@ -92,8 +101,8 @@ export default function Feed(): JSX.Element {
   }, []);
   useEffect(() => {
     fetchPublicacoes();
-  }, [novaPub]);
-  
+  }, [novaPub, page]);
+
   return (
     <>
       <Header />
@@ -192,17 +201,52 @@ export default function Feed(): JSX.Element {
         </div>
         <div className="mt-1 p-0">
           {pubs.length !== 0 ? (
-            pubs.map((pub, index) => (
-              <Publicacao
-                key={index}
-                id={pub.id}
-                autor={pub.autor}
-                publicado_em={pub.publicado_em.substring(0, 10)}
-                titulo={pub.titulo}
-                descricao={pub.descricao}
-                imagem={pub.imagem}
-              />
-            ))
+            <div className="mt-1 p-0">
+              {pubs.map((pub, index) => (
+                <Publicacao
+                  key={index}
+                  id={pub.id}
+                  autor={pub.autor}
+                  publicado_em={pub.publicado_em.substring(0, 10)}
+                  titulo={pub.titulo}
+                  descricao={pub.descricao}
+                  imagem={pub.imagem}
+                />
+              ))}
+              <button
+                className="br-button mb-3"
+                onClick={() => setPage(page + 1)}
+              >
+                <i className="fas fa-arrow-down"></i>Ver mais
+              </button>
+              {errorPagination && (
+                <div className="br-message info">
+                  <div className="icon">
+                    <i
+                      className="fas fa-info-circle fa-lg"
+                      aria-hidden="true"
+                    ></i>
+                  </div>
+                  <div
+                    className="content"
+                    aria-label={errorPagination}
+                    role="alert"
+                  >
+                    <span className="message-body">{errorPagination}</span>
+                  </div>
+                  <div className="close">
+                    <button
+                      className="br-button circle small"
+                      type="button"
+                      aria-label="Fechar a messagem alterta"
+                      onClick={() => setErrorPagination("")}
+                    >
+                      <i className="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <h1 className="text-center mt-6">
               Ainda não há publicações, seja a primeira pessoa a publicar
