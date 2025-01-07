@@ -16,9 +16,10 @@ export interface PublicacaoFormProps {
 export default function Feed(): JSX.Element {
   const [pubs, setPubs] = useState<PublicacaoProps[]>([]);
   const [novaPub, setNovaPub] = useState<boolean>(false);
+  const [errorPubs, setErrorPubs] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [pubsLength, setPubsLength] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
-  const [errorPagination, setErrorPagination] = useState<string>("");
   const navigate: NavigateFunction = useNavigate();
 
   const schema = yup.object().shape({
@@ -46,14 +47,12 @@ export default function Feed(): JSX.Element {
     const data: PublicacaoFormProps = {
       titulo: pub.titulo,
       descricao: pub.descricao,
-      imagem: pub.imagem[0] ?? "",
+      imagem: pub.imagem ? pub.imagem[0] : "",
     };
 
     await axiosRequestor
       .post("publicacao/", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       })
       .catch((err) => {
         console.error(err);
@@ -80,19 +79,22 @@ export default function Feed(): JSX.Element {
 
   const fetchPublicacoes = async (): Promise<void> => {
     await axiosRequestor
+      .get("publicacao/", { headers: { "Content-Type": "application/json" } })
+      .then((response) => setPubsLength(response.data.count))
+      .catch((err) => {
+        console.error(err);
+        setErrorPubs(
+          "Ainda não há publicações, seja a primeira pessoa a publicar conosco!"
+        );
+      });
+
+    await axiosRequestor
       .get(`publicacao/?page=${page}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       })
       .then((response) => setPubs(response.data.results))
       .catch((err) => {
         console.error(err);
-        if (err.response.status === 404) {
-          setErrorPagination("Não há mais publicações para serem exibidas.");
-          setPage(page - 1);
-          return;
-        }
       });
   };
 
@@ -213,45 +215,31 @@ export default function Feed(): JSX.Element {
                   imagem={pub.imagem}
                 />
               ))}
-              <button
-                className="br-button mb-3"
-                onClick={() => setPage(page + 1)}
-              >
-                <i className="fas fa-arrow-down"></i>Ver mais
-              </button>
-              {errorPagination && (
-                <div className="br-message info">
-                  <div className="icon">
-                    <i
-                      className="fas fa-info-circle fa-lg"
-                      aria-hidden="true"
-                    ></i>
-                  </div>
-                  <div
-                    className="content"
-                    aria-label={errorPagination}
-                    role="alert"
+              <div className="text-right mr-6">
+                {page > 1 && (
+                  <button
+                    className="br-button mb-3"
+                    onClick={() => setPage(page - 1)}
                   >
-                    <span className="message-body">{errorPagination}</span>
-                  </div>
-                  <div className="close">
-                    <button
-                      className="br-button circle small"
-                      type="button"
-                      aria-label="Fechar a messagem alterta"
-                      onClick={() => setErrorPagination("")}
-                    >
-                      <i className="fas fa-times" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                </div>
-              )}
+                    <i className="fas fa-arrow-left"></i>Anterior
+                  </button>
+                )}
+                {!(page * 10 >= pubsLength) && (
+                  <button
+                    className="br-button mb-3"
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Próxima<i className="fas fa-arrow-right"></i>
+                  </button>
+                )}
+              </div>
+              <p className="text-center p-4">
+                página {page} de {(pubsLength / 10) | 1} página
+                {((pubsLength / 10) | (0 + 1)) > 1 && "s"}
+              </p>
             </div>
           ) : (
-            <h1 className="text-center mt-6">
-              Ainda não há publicações, seja a primeira pessoa a publicar
-              conosco!
-            </h1>
+            <h1 className="text-center mt-6">{errorPubs}</h1>
           )}
         </div>
       </div>
