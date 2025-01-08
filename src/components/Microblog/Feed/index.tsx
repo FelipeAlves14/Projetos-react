@@ -79,22 +79,19 @@ export default function Feed(): JSX.Element {
 
   const fetchPublicacoes = async (): Promise<void> => {
     await axiosRequestor
-      .get("publicacao/", { headers: { "Content-Type": "application/json" } })
-      .then((response) => setPubsLength(response.data.count))
+      .get(`publicacao/?page=${page}`, {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((response) => {
+        setPubs(response.data.results);
+        if (response.data.count !== pubsLength)
+          setPubsLength(response.data.count);
+      })
       .catch((err) => {
         console.error(err);
         setErrorPubs(
           "Ainda não há publicações, seja a primeira pessoa a publicar conosco!"
         );
-      });
-
-    await axiosRequestor
-      .get(`publicacao/?page=${page}`, {
-        headers: { "Content-Type": "application/json" },
-      })
-      .then((response) => setPubs(response.data.results))
-      .catch((err) => {
-        console.error(err);
       });
   };
 
