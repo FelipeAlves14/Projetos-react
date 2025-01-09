@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Header from "../Header";
 import Publicacao, { PublicacaoProps } from "../Publicacao";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
+import Paginacao from "../Paginacao";
 
 export interface PublicacaoFormProps {
   titulo: string;
@@ -14,12 +15,14 @@ export interface PublicacaoFormProps {
 }
 
 export default function Feed(): JSX.Element {
+  const [loading, setLoading] = useState<boolean>(false);
   const [pubs, setPubs] = useState<PublicacaoProps[]>([]);
   const [novaPub, setNovaPub] = useState<boolean>(false);
-  const [errorPubs, setErrorPubs] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [errorPagination, setErrorPagination] = useState<string>("");
   const [pubsLength, setPubsLength] = useState<number>(0);
-  const [page, setPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pages, setPages] = useState<number[]>([]);
   const navigate: NavigateFunction = useNavigate();
 
   const schema = yup.object().shape({
@@ -78,21 +81,29 @@ export default function Feed(): JSX.Element {
   }
 
   const fetchPublicacoes = async (): Promise<void> => {
+    setLoading(true);
+    if (currentPage < 1 || currentPage > ((pubsLength / 10) | 1)) {
+      if (currentPage < 1) setCurrentPage(1);
+      else setCurrentPage(currentPage - 1);
+      setErrorPagination("Não há mais páginas para esta direção.");
+      setLoading(false);
+      return;
+    }
     await axiosRequestor
-      .get(`publicacao/?page=${page}`, {
+      .get(`publicacao/?page=${currentPage}`, {
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {
         setPubs(response.data.results);
-        if (response.data.count !== pubsLength)
+        if (response.data.count !== pubsLength) {
           setPubsLength(response.data.count);
+          setPages([...Array((response.data.count / 10) | 1).keys()]);
+        }
       })
       .catch((err) => {
         console.error(err);
-        setErrorPubs(
-          "Ainda não há publicações, seja a primeira pessoa a publicar conosco!"
-        );
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -100,7 +111,7 @@ export default function Feed(): JSX.Element {
   }, []);
   useEffect(() => {
     fetchPublicacoes();
-  }, [novaPub, page]);
+  }, [novaPub, currentPage]);
 
   return (
     <>
@@ -198,47 +209,42 @@ export default function Feed(): JSX.Element {
             </div>
           </form>
         </div>
-        <div className="mt-1 p-0">
-          {pubs.length !== 0 ? (
-            <div className="mt-1 p-0">
-              {pubs.map((pub, index) => (
-                <Publicacao
-                  key={index}
-                  id={pub.id}
-                  autor={pub.autor}
-                  publicado_em={pub.publicado_em.substring(0, 10)}
-                  titulo={pub.titulo}
-                  descricao={pub.descricao}
-                  imagem={pub.imagem}
+        {loading ? (
+          <div
+            className="br-loading medium"
+            role="progressbar"
+            aria-label="carregando exemplo medium exemplo"
+          ></div>
+        ) : (
+          <div className="mt-1 p-0">
+            {pubs.length !== 0 ? (
+              <div className="mt-1 p-0">
+                {pubs.map((pub, index) => (
+                  <Publicacao
+                    key={index}
+                    id={pub.id}
+                    autor={pub.autor}
+                    publicado_em={pub.publicado_em.substring(0, 10)}
+                    titulo={pub.titulo}
+                    descricao={pub.descricao}
+                    imagem={pub.imagem}
+                  />
+                ))}
+                <Paginacao
+                  pages={pages}
+                  currentPage={currentPage}
+                  setPage={setCurrentPage}
+                  error={errorPagination ?? ""}
                 />
-              ))}
-              <div className="text-right mr-6">
-                {page > 1 && (
-                  <button
-                    className="br-button mb-3"
-                    onClick={() => setPage(page - 1)}
-                  >
-                    <i className="fas fa-arrow-left"></i>Anterior
-                  </button>
-                )}
-                {!(page * 10 >= pubsLength) && (
-                  <button
-                    className="br-button mb-3"
-                    onClick={() => setPage(page + 1)}
-                  >
-                    Próxima<i className="fas fa-arrow-right"></i>
-                  </button>
-                )}
               </div>
-              <p className="text-center p-4">
-                página {page} de {(pubsLength / 10) | 1} página
-                {((pubsLength / 10) | (0 + 1)) > 1 && "s"}
-              </p>
-            </div>
-          ) : (
-            <h1 className="text-center mt-6">{errorPubs}</h1>
-          )}
-        </div>
+            ) : (
+              <h1 className="text-center mt-6">
+                Ainda não há publicações, seja a primeira pessoa a publicar
+                conosco!
+              </h1>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
