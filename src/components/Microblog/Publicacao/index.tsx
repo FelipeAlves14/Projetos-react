@@ -103,7 +103,7 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
     <div className="col-12">
       <div className="br-card mr-6">
         <div className="card-header">
-          <div className="ml-3 d-flex text-center justify-content-end">
+          <div className="d-flex text-center justify-content-end">
             <div className="text-weight-semi-bold text-up-02">
               {autor.username}
             </div>
@@ -113,11 +113,13 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
               </div>
             </div>
           </div>
-          <h6 className="text-left ml-3">{titulo}</h6>
+          <h6 className="text-left">{titulo}</h6>
           <span className="br-divider light-mode my-3"></span>
         </div>
         <div
-          className={`card-content text-left ${imagem && "d-flex"}`}
+          className={`card-content text-left ${
+            imagem && "d-flex justify-content-between"
+          }`}
           tabIndex={0}
         >
           <p className="mr-3">{descricao}</p>
@@ -182,15 +184,21 @@ export default function Publicacao(props: PublicacaoProps): JSX.Element {
             <span className="br-divider light-mode mb-3 mx-3"></span>
             <div className="card-footer d-flex flex-column">
               <div className="d-flex overflow-auto flex-column">
-                {listaComentarios.map(
-                  (comentario: ComentarioProps, index: number) => (
-                    <Comentario
-                      key={index}
-                      autor={comentario.autor}
-                      publicado_em={comentario.publicado_em}
-                      mensagem={comentario.mensagem}
-                    />
-                  )
+                {listaComentarios.length !== 0 ? (
+                  <>
+                    {listaComentarios.map(
+                      (comentario: ComentarioProps, index: number) => (
+                        <Comentario
+                          key={index}
+                          autor={comentario.autor}
+                          publicado_em={comentario.publicado_em}
+                          mensagem={comentario.mensagem}
+                        />
+                      )
+                    )}
+                  </>
+                ) : (
+                  <p className="p-2">Esta publicação não possui comentários...</p>
                 )}
               </div>
             </div>
